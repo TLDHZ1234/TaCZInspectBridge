@@ -1,0 +1,32 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MIT"
+
+[[mods]]
+modId = "taczinspect"
+version = "1.0.0"
+displayName = "TaCZ Inspect Bridge"
+description = '''Get inspect animation progress from TaCZ guns.'''
+
+[[dependencies.taczinspect]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.0,)"
+side = "CLIENT"
+
+[[dependencies.taczinspect]]
+modId = "tacz"
+type = "required"
+versionRange = "[1.1.0,)"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[dependencies.taczinspect]]
+modId = "lrtactical"
+type = "required"
+versionRange = "[0.4.3,)"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[mixins]]
+config = "taczinspect.mixins.json"

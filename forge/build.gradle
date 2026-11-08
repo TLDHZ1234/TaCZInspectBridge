@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
+}
+
+version = mod_version
+group = mod_group_id
+base.archivesName = "${mod_id}-forge"
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'parchment', version: "${forge_parchment_mappings}-${forge_minecraft_version}"
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods { "${mod_id}" { source sourceSets.main } }
+        }
+        server {
+            workingDirectory project.file('run')
+            mods { "${mod_id}" { source sourceSets.main } }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${forge_version}"
+
+    // 自动读取本地 mods/Forge 下的所有前置包
+    def forgeModsDir = file("../mods/Forge")
+    if (forgeModsDir.exists()) {
+        forgeModsDir.listFiles({ file -> file.name.endsWith('.jar') } as FileFilter).each { file ->
+            implementation fg.deobf(files(file))
+        }
+    }
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: forge_minecraft_version, minecraft_version_range: '[1.20.1,1.21)',
+            forge_version: forge_version, forge_version_range: '[47,)',
+            loader_version_range: '[47,)', mod_id: mod_id, mod_name: mod_name,
+            mod_license: 'MIT', mod_version: mod_version, mod_authors: mod_authors, mod_description: mod_description
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) { expand replaceProperties + [project: project] }
+}

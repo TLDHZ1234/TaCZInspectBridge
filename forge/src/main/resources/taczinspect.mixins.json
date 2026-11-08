@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.taczinspect.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "taczinspect.refmap.json",
+  "client": [
+    "AnimationStateContextMixin",
+    "AnimationStateMachineMixin",
+    "ObjectAnimationRunnerAccessor",
+    "GameRendererMixin"
+  ],
+  "injectors": { "defaultRequire": 1 }
+}

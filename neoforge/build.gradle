@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'net.neoforged.moddev' version '2.0.78'
+}
+
+version = mod_version
+group = mod_group_id
+base.archivesName = "${mod_id}-neoforge"
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = project.neo_version
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+    runs { client { client() } }
+    mods { "${mod_id}" { sourceSet(sourceSets.main) } }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 自动读取本地 mods/NeoForge 下的所有前置包
+    def neoModsDir = file("../mods/NeoForge")
+    if (neoModsDir.exists()) {
+        neoModsDir.listFiles({ file -> file.name.endsWith('.jar') } as FileFilter).each { file ->
+            implementation files(file)
+        }
+    }
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: parchment_minecraft_version, neo_version: neo_version,
+            mod_id: mod_id, mod_name: mod_name, mod_version: mod_version,
+            mod_authors: mod_authors, mod_description: mod_description,
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/neoforge.mods.toml']) { expand replaceProperties }
+}

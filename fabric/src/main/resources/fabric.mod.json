@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "taczinspect",
+  "version": "${version}",
+  "name": "TaCZ Inspect Bridge",
+  "description": "Get inspect animation progress from TaCZ guns.",
+  "authors": ["YourName"],
+  "license": "MIT",
+  "environment": "client",
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "tacz": "*",
+    "lrtactical": "*"
+  },
+  "mixins": [
+    "taczinspect.mixins.json"
+  ]
+}
