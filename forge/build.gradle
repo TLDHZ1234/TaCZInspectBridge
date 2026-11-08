@@ -10,7 +10,7 @@ base.archivesName = "${mod_id}-forge"
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-    mappings channel: 'parchment', version: "${forge_parchment_mappings}-${forge_minecraft_version}"
+    mappings channel: 'parchment', version: project.forge_parchment_mappings
     runs {
         client {
             workingDirectory project.file('run')
