@@ -63,7 +63,8 @@ public abstract class AnimationStateContextMixin implements IInspectAccessor {
             if (target.isStopped()) {
                 continue;
             }
-            if (taczinspect$isInspectName(target.getAnimation().name)) {
+            var animation = target.getAnimation();
+            if (animation != null && taczinspect$isInspectName(animation.name)) {
                 return target;
             }
         }
