@@ -1,15 +1,25 @@
 pluginManagement {
     repositories {
         maven { name = 'MinecraftForge'; url = 'https://maven.minecraftforge.net/' }
+        maven { name = 'NeoForged'; url = 'https://maven.neoforged.net/releases/' }
         maven { name = 'ParchmentMC'; url = 'https://maven.parchmentmc.org' }
-        maven { url = 'https://maven.fabricmc.net/' }
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        maven { name = 'Fabric'; url = 'https://maven.fabricmc.net/' }
+        maven { name = 'Sponge'; url = 'https://repo.spongepowered.org/repository/maven-public/' }
         gradlePluginPortal()
         mavenCentral()
     }
 }
 
 rootProject.name = 'TaCZInspectBridge'
-include 'fabric'
-include 'neoforge'
-include 'forge' // 【加上这一行】
+
+// Building one loader at a time (CI) only pulls in that loader's toolchain:
+//   ./gradlew -Pmodule=forge :forge:build
+// Without -Pmodule every loader is part of the build.
+def singleModule = providers.gradleProperty('module').getOrNull()
+if (singleModule != null) {
+    include singleModule
+} else {
+    include 'fabric'
+    include 'neoforge'
+    include 'forge'
+}

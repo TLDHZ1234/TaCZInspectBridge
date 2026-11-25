@@ -7,8 +7,16 @@ plugins {
 
 version = mod_version
 group = mod_group_id
-base.archivesName = "${mod_id}-forge"
+base.archivesName = "${mod_id}-forge-${forge_minecraft_version}"
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+sourceSets {
+    main {
+        // Shared, loader independent sources (api + mixins) live in ../common
+        java.srcDir rootProject.file('common/src/main/java')
+    }
+}
 
 minecraft {
     mappings channel: 'parchment', version: project.forge_parchment_mappings
@@ -26,14 +34,28 @@ minecraft {
     }
 }
 
+mixin {
+    // Generates ${mod_id}-refmap.json, which the mixin config references.
+    add sourceSets.main, "${mod_id}-refmap.json"
+}
+
+// Forge 1.20.1 discovers mixin configs through the jar manifest (the
+// [[mixins]] table in mods.toml is only understood by NeoForge).
+jar {
+    manifest {
+        attributes('MixinConfigs': 'taczinspect.mixins.json')
+    }
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    // 自动读取本地 mods/Forge 下的所有前置包
+    // Everything in mods/Forge (TaCZ, LRTactical, ...) is deobfuscated and used for compilation.
     def forgeModsDir = file("../mods/Forge")
     if (forgeModsDir.exists()) {
         forgeModsDir.listFiles({ file -> file.name.endsWith('.jar') } as FileFilter).each { file ->
@@ -50,5 +72,5 @@ tasks.named('processResources', ProcessResources).configure {
             mod_license: 'MIT', mod_version: mod_version, mod_authors: mod_authors, mod_description: mod_description
     ]
     inputs.properties replaceProperties
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) { expand replaceProperties + [project: project] }
+    filesMatching(['META-INF/mods.toml']) { expand replaceProperties + [project: project] }
 }

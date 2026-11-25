@@ -1,45 +1,62 @@
-name: Build Mod
+name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    name: ${{ matrix.loader }} (MC ${{ matrix.minecraft }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ForgeGradle 6 needs to run on JDK 17 for the 1.20.1 toolchain.
+          - loader: forge
+            minecraft: 1.20.1
+            java: 17
+          - loader: fabric
+            minecraft: 1.21.1
+            java: 21
+          - loader: neoforge
+            minecraft: 1.21.1
+            java: 21
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: ${{ matrix.java }}
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Show environment
+        run: |
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
 
-      # 构建全部三个模块
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Build
+        run: |
+          chmod +x gradlew
+          ./gradlew -Pmodule=${{ matrix.loader }} :${{ matrix.loader }}:build --stacktrace
 
-      # 将三个平台的 jar 包分别上传
-      - name: Upload Fabric Mod JAR
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TaCZInspect-Fabric
-          path: fabric/build/libs/*.jar
-
-      - name: Upload NeoForge Mod JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: TaCZInspect-NeoForge
-          path: neoforge/build/libs/*.jar
-
-      - name: Upload Forge Mod JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: TaCZInspect-Forge
-          path: forge/build/libs/*.jar
+          name: TaCZInspect-${{ matrix.loader }}-${{ matrix.minecraft }}
+          path: |
+            ${{ matrix.loader }}/build/libs/*.jar
+            !${{ matrix.loader }}/build/libs/*-sources.jar
+            !${{ matrix.loader }}/build/libs/*-dev.jar
+            !${{ matrix.loader }}/build/libs/*-slim.jar
+          if-no-files-found: error

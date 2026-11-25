@@ -5,8 +5,16 @@ plugins {
 
 version = mod_version
 group = mod_group_id
-base.archivesName = "${mod_id}-neoforge"
+base.archivesName = "${mod_id}-neoforge-${minecraft_version}"
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+sourceSets {
+    main {
+        // Shared, loader independent sources (api + mixins) live in ../common
+        java.srcDir rootProject.file('common/src/main/java')
+    }
+}
 
 neoForge {
     version = project.neo_version
@@ -15,7 +23,9 @@ neoForge {
         minecraftVersion = project.parchment_minecraft_version
     }
     runs { client { client() } }
-    mods { "${mod_id}" { sourceSet(sourceSets.main) } }
+    mods {
+        "${mod_id}" { sourceSet(sourceSets.main) }
+    }
 }
 
 repositories {
@@ -23,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    // 自动读取本地 mods/NeoForge 下的所有前置包
+    // Everything in mods/NeoForge (TaCZ, LRTactical, ...) is used for compilation only.
     def neoModsDir = file("../mods/NeoForge")
     if (neoModsDir.exists()) {
         neoModsDir.listFiles({ file -> file.name.endsWith('.jar') } as FileFilter).each { file ->
