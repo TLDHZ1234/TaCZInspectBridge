@@ -62,6 +62,15 @@ dependencies {
             implementation fg.deobf(files(file))
         }
     }
+
+    // TaCZ ships these as nested jars. fg.deobf does not extract them, but TaCZ's animation API
+    // references some of their types, so they have to be on the compile classpath.
+    def forgeLibsDir = file("../mods/Forge/jarjar")
+    if (forgeLibsDir.exists()) {
+        forgeLibsDir.listFiles({ file -> file.name.endsWith('.jar') } as FileFilter).each { file ->
+            compileOnly files(file)
+        }
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {

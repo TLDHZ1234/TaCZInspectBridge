@@ -40,6 +40,14 @@ dependencies {
             implementation files(file)
         }
     }
+
+    // TaCZ ships these as nested jars; TaCZ's animation API references some of their types.
+    def neoLibsDir = file("../mods/NeoForge/jarjar")
+    if (neoLibsDir.exists()) {
+        neoLibsDir.listFiles({ file -> file.name.endsWith('.jar') } as FileFilter).each { file ->
+            compileOnly files(file)
+        }
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {
